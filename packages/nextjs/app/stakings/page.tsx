@@ -12,6 +12,8 @@ const Stakings: NextPage = () => {
     fromBlock: 0n,
   });
 
+  console.log(stakeEvents);
+
   if (isLoading)
     return (
       <div className="flex justify-center items-center mt-10">

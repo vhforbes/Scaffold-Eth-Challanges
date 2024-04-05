@@ -85,9 +85,9 @@ uint256 public constant threshold = 1 ether;
 
 ### 🥅 Goals
 
-- [ ] Do you see the balance of the `Staker` contract go up when you `stake()`?
-- [ ] Is your `balance` correctly tracked?
-- [ ] Do you see the events in the `Stake Events` tab?
+- [x] Do you see the balance of the `Staker` contract go up when you `stake()`?
+- [x] Is your `balance` correctly tracked?
+- [x] Do you see the events in the `Stake Events` tab?
 
   ![allStakings](https://github.com/scaffold-eth/se-2-challenges/assets/55535804/80bcc843-034c-4547-8535-129ed494a204)
 
