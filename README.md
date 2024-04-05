@@ -71,8 +71,8 @@ yarn start
 
 ### 🥅 Goals
 
-- [ ] Can you check the `balanceOf()` your frontend address in the `Debug Contracts` tab? (**YourToken** contract)
-- [ ] Can you `transfer()` your token to another account and check _that_ account's `balanceOf`?
+- [x] Can you check the `balanceOf()` your frontend address in the `Debug Contracts` tab? (**YourToken** contract)
+- [x] Can you `transfer()` your token to another account and check _that_ account's `balanceOf`?
 
 ![debugContractsYourToken](https://github.com/scaffold-eth/se-2-challenges/assets/55535804/5fb4daeb-5d05-4522-96b3-76f052a68418)
 
@@ -100,7 +100,7 @@ Uncomment the `Buy Tokens` sections in `packages/nextjs/app/token-vendor/page.ts
 
 ### 🥅 Goals
 
-- [ ] When you try to buy tokens from the vendor, you should get an error: **'ERC20: transfer amount exceeds balance'**
+- [x] When you try to buy tokens from the vendor, you should get an error: **'ERC20: transfer amount exceeds balance'**
 
 ⚠️ This is because the Vendor contract doesn't have any YourTokens yet!
 
@@ -127,9 +127,9 @@ await yourToken.transfer(
 
 ### 🥅 Goals
 
-- [ ] Does the `Vendor` address start with a `balanceOf` **1000** in `YourToken` on the `Debug Contracts` tab?
-- [ ] Can you buy **10** tokens for **0.1** ETH?
-- [ ] Can you transfer tokens to a different account?
+- [x] Does the `Vendor` address start with a `balanceOf` **1000** in `YourToken` on the `Debug Contracts` tab?
+- [x] Can you buy **10** tokens for **0.1** ETH?
+- [x] Can you transfer tokens to a different account?
 
 > 📝 Edit `Vendor.sol` to inherit _Ownable_.
 
@@ -145,17 +145,18 @@ await vendor.transferOwnership("**YOUR FRONTEND ADDRESS**");
 
 ### 🥅 Goals
 
-- [ ] Is your frontend address the `owner` of the `Vendor`?
+- [x] Is your frontend address the `owner` of the `Vendor`?
 
 > 📝 Finally, add a `withdraw()` function in `Vendor.sol` that lets the owner withdraw all the ETH from the vendor contract.
 
 ### 🥅 Goals
 
-- [ ] Can **only** the `owner` withdraw the ETH from the `Vendor`?
+- [x] Can **only** the `owner` withdraw the ETH from the `Vendor`?
 
 ### ⚔️ Side Quests
 
-- [ ] What if you minted **2000** and only sent **1000** to the `Vendor`?
+- [x] What if you minted **2000** and only sent **1000** to the `Vendor`?
+      The tokens would be held by the deployer.
 
 ---
 
@@ -183,12 +184,12 @@ await vendor.transferOwnership("**YOUR FRONTEND ADDRESS**");
 
 ### 🥅 Goal
 
-- [ ] Can you sell tokens back to the vendor?
-- [ ] Do you receive the right amount of ETH for the tokens?
+- [x] Can you sell tokens back to the vendor?
+- [x] Do you receive the right amount of ETH for the tokens?
 
 ### ⚔️ Side Quests
 
-- [ ] Should we disable the `owner` withdraw to keep liquidity in the `Vendor`?
+- [ ] Should we disable the `owner` withdraw to keep liquidity in the `Vendor`? IDK
 - [ ] It would be a good idea to display Sell Token Events. Create an **event** `SellTokens(address seller, uint256  amountOfTokens, uint256 amountOfETH)` and `emit` it in your `Vendor.sol` and uncomment `SellTokens Events` section in your `packages/nextjs/app/events/page.tsx` to update your frontend.
 
   ![Events](https://github.com/scaffold-eth/se-2-challenges/assets/55535804/662c96b5-d53f-4efa-af4a-d3106bfd47f0)
