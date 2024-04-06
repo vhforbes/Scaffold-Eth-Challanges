@@ -71,8 +71,11 @@ yarn start
 
 ### 🥅 Goals
 
-- [ ] Track the solidity code to find out how the DiceGame contract is generating random numbers.
-- [ ] Is it possible to predict the random number for any given roll?
+- [x] Track the solidity code to find out how the DiceGame contract is generating random numbers.
+      Its getting a value from the previous hash and encoding it with the address of the contract and a nounce
+
+- [x] Is it possible to predict the random number for any given roll?
+      Yes, since he is getting the value from the previous block, and the block number is public, aswell as the contract address and nouce, we can make this calculation ourselves
 
 ---
 
@@ -94,9 +97,9 @@ Next add a `riggedRoll()` function. This function should predict the randomness 
 
 ### ⚔️ Side Quest
 
-- [ ] Add a statement to require `address(this).balance >= .002 ether` in your riggedRoll function. This will help prevent calling the `rollTheDice()` function without enough value.
-- [ ] Uncomment the code in `packages/nextjs/app/dice/page.tsx` to show a riggedRoll button and contract balance on the main UI tab. Now you can test your function without switching tabs.
-- [ ] Does your riggedRoll function only call `rollTheDice()` when it's going to be a winning roll? What happens when it does call `rollTheDice()`?
+- [x] Add a statement to require `address(this).balance >= .002 ether` in your riggedRoll function. This will help prevent calling the `rollTheDice()` function without enough value.
+- [x] Uncomment the code in `packages/nextjs/app/dice/page.tsx` to show a riggedRoll button and contract balance on the main UI tab. Now you can test your function without switching tabs.
+- [x] Does your riggedRoll function only call `rollTheDice()` when it's going to be a winning roll? What happens when it does call `rollTheDice()`?
 
 ![RiggedLosingRoll](https://github.com/scaffold-eth/se-2-challenges/assets/55535804/b6c8d7b4-139b-4f54-a62c-a0c77b3692a3)
 
@@ -112,12 +115,12 @@ You have beaten the game, but where is your money? Since the RiggedRoll contract
 
 ### 🥅 Goals
 
-- [ ] Can you send value from the RiggedRoll contract to your front end address?
-- [ ] Is anyone able to call the withdraw function? What would be the downside to that?
+- [x] Can you send value from the RiggedRoll contract to your front end address?
+- [x] Is anyone able to call the withdraw function? What would be the downside to that?
 
 ### ⚔️ Side Quest
 
-- [ ] Lock the withdraw function so it can only be called by the owner.
+- [x] Lock the withdraw function so it can only be called by the owner.
 
 ![WithdrawOnlyOwner](https://github.com/scaffold-eth/se-2-challenges/assets/55535804/e8397b1e-a077-4009-b518-30a6d8deb6e7)
 

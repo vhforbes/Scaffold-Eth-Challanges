@@ -4,49 +4,56 @@ pragma solidity >=0.8.0 <0.9.0; //Do not change the solidity version as it negat
 import "hardhat/console.sol";
 
 contract DiceGame {
-  uint256 public nonce = 0;
-  uint256 public prize = 0;
+	uint256 public nonce = 0;
+	uint256 public prize = 0;
 
-  error NotEnoughEther();
+	error NotEnoughEther();
 
-  event Roll(address indexed player, uint256 amount, uint256 roll);
-  event Winner(address winner, uint256 amount);
+	event Roll(address indexed player, uint256 amount, uint256 roll);
+	event Winner(address winner, uint256 amount);
 
-  constructor() payable {
-    resetPrize();
-  }
+	constructor() payable {
+		resetPrize();
+	}
 
-  function resetPrize() private {
-    prize = ((address(this).balance * 10) / 100);
-  }
+	function resetPrize() private {
+		prize = ((address(this).balance * 10) / 100);
+	}
 
-  function rollTheDice() public payable {
-    if (msg.value < 0.002 ether) {
-      revert NotEnoughEther();
-    }
+	function rollTheDice() public payable {
+		if (msg.value < 0.002 ether) {
+			revert NotEnoughEther();
+		}
 
-    bytes32 prevHash = blockhash(block.number - 1);
-    bytes32 hash = keccak256(abi.encodePacked(prevHash, address(this), nonce));
-    uint256 roll = uint256(hash) % 16;
+		bytes32 prevHash = blockhash(block.number - 1);
+		console.log("\t", "   Dice Game Roll block.number :", block.number);
+		bytes32 hash = keccak256(
+			abi.encodePacked(prevHash, address(this), nonce)
+		);
 
-    console.log("\t", "   Dice Game Roll:", roll);
+		// The modulo operator. Will only give results from 0 to 15
+		uint256 roll = uint256(hash) % 16;
 
-    nonce++;
-    prize += ((msg.value * 40) / 100);
+		console.log("\t", "   Dice Game Roll:", roll);
 
-    emit Roll(msg.sender, msg.value, roll);
+		nonce++;
 
-    if (roll > 5) {
-      return;
-    }
+		// This scumbag is geting 60% of the dice roll!!!
+		prize += ((msg.value * 40) / 100);
 
-    uint256 amount = prize;
-    (bool sent, ) = msg.sender.call{value: amount}("");
-    require(sent, "Failed to send Ether");
+		emit Roll(msg.sender, msg.value, roll);
 
-    resetPrize();
-    emit Winner(msg.sender, amount);
-  }
+		if (roll > 5) {
+			return;
+		}
 
-  receive() external payable {}
+		uint256 amount = prize;
+		(bool sent, ) = msg.sender.call{ value: amount }("");
+		require(sent, "Failed to send Ether");
+
+		resetPrize();
+		emit Winner(msg.sender, amount);
+	}
+
+	receive() external payable {}
 }
