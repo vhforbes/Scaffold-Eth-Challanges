@@ -200,8 +200,8 @@ Now, when we `yarn deploy --reset` then our contract should be initialized as so
 
 ### 🥅 Goals / Checks
 
-- [ ] 🎈 In the DEX tab is your contract showing 5 ETH and 5 Balloons of liquidity?
-- [ ] ⚠ If you are planning to submit the challenge, make sure to implement the `getLiquidity` getter function in `DEX.sol`
+- [x] 🎈 In the DEX tab is your contract showing 5 ETH and 5 Balloons of liquidity?
+- [x] ⚠ If you are planning to submit the challenge, make sure to implement the `getLiquidity` getter function in `DEX.sol`
 
 ---
 
@@ -292,8 +292,17 @@ Finally, let’s say the ratio is the same, but we want to swap 100,000 tokens i
 
 ### 🥅 Goals / Checks
 
-- [ ] 🤔 Do you understand how the x\*y=k price curve actually works? Write down a clear explanation for yourself and derive the formula for price. You might have to shake off some old algebra skills!
-- [ ] 💃 You should be able to go through the price section of this tutorial with the sample numbers and generate the same outputChange variable.
+- [x] 🤔 Do you understand how the x\*y=k price curve actually works? Write down a clear explanation for yourself and derive the formula for price. You might have to shake off some old algebra skills!
+
+There are two different perspectives here. Price and Liquidity. Price is calculated after we know the new amount of tokens that will be left on the exchange after the trade.
+dy = amount to buy
+dx = amount to sell
+
+dy = y - (k / (x + dx)) => Here is the formula to know know many tokens the buyer will get.
+
+dx / dy => Is used to calculate the price. If i were buying x token, it would be inverse but also the above equation would change.
+
+- [x] 💃 You should be able to go through the price section of this tutorial with the sample numbers and generate the same outputChange variable.
 
 ---
 
@@ -459,7 +468,7 @@ Let’s create two new functions that let us deposit and withdraw liquidity. How
 
 > The `deposit()` function receives ETH and also transfers $BAL tokens from the caller to the contract at the right ratio. The contract also tracks the amount of liquidity (how many liquidity provider tokens (LPTs) minted) the depositing address owns vs the totalLiquidity.
 
-What does this hint mean in practice? The goal is to allow a user to `deposit()` ETH into our `totalLiquidity`, and update their `liquidity`. This is very similar to the `init()` function, except we want it to work for anyone providing liquidity. Also, since there already is liquidity we want the liquidity they provide to leave the ratio of the two assets unchanged. 
+What does this hint mean in practice? The goal is to allow a user to `deposit()` ETH into our `totalLiquidity`, and update their `liquidity`. This is very similar to the `init()` function, except we want it to work for anyone providing liquidity. Also, since there already is liquidity we want the liquidity they provide to leave the ratio of the two assets unchanged.
 
 <details markdown='1'><summary>🦉 Guiding Questions</summary>
 
@@ -485,8 +494,9 @@ Part 1: Getting Reserves 🏦
 
 - [ ] Do you have reserves of both assets?
 
-Part 2: Performing Calculations 🤖 
-> What are we calculating again? Oh yeah, for the amount of ETH the user is depositing, we want them to also deposit a proportional amount of tokens. Let's make a reusable equation where we can swap out a value and get an output of the ETH and $BAL the user will be depositing, named `tokenDeposit` and `liquidityMinted`. 
+Part 2: Performing Calculations 🤖
+
+> What are we calculating again? Oh yeah, for the amount of ETH the user is depositing, we want them to also deposit a proportional amount of tokens. Let's make a reusable equation where we can swap out a value and get an output of the ETH and $BAL the user will be depositing, named `tokenDeposit` and `liquidityMinted`.
 
 <details markdown='1'><summary>Question Four</summary>
 
@@ -589,7 +599,8 @@ Part 1: Getting Reserves 🏦
 
 </details>
 
-Part 2: Performing Calculations 🤖 
+Part 2: Performing Calculations 🤖
+
 > We need to calculate how much of each asset our user is going withdraw, call them `ethWithdrawn` and `tokenAmount`. The equation is: `amount *` reserveOfDesiredUnits `/ totalLiquidity`
 
 <details markdown='1'><summary>Question Four</summary>
