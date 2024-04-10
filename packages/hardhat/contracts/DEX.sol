@@ -2,6 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
+import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
@@ -126,14 +127,44 @@ contract DEX {
 	/**
 	 * @notice sends Ether to DEX in exchange for $BAL
 	 */
-	function ethToToken() public payable returns (uint256 tokenOutput) {}
+	function ethToToken() public payable returns (uint256 tokenOutput) {
+		require(msg.value > 0, "cannot swap 0 ETH");
+		uint256 ethAmount = msg.value;
+		uint256 ethReserves = address(this).balance;
+		uint256 balReserves = token.balanceOf(address(this));
+		uint256 amountToSend = price(ethAmount, ethReserves, balReserves);
+
+		token.approve(address(this), amountToSend);
+
+		bool success = token.transferFrom(
+			address(this),
+			msg.sender,
+			amountToSend
+		);
+
+		require(success, "Failed to swap");
+
+		return amountToSend;
+	}
 
 	/**
 	 * @notice sends $BAL tokens to DEX in exchange for Ether
 	 */
-	function tokenToEth(
-		uint256 tokenInput
-	) public returns (uint256 ethOutput) {}
+	function tokenToEth(uint256 tokenInput) public returns (uint256 ethOutput) {
+		require(token.balanceOf(msg.sender) > 0, "cannot swap 0 BAL");
+		uint256 balAmount = tokenInput;
+		uint256 ethReserves = address(this).balance;
+		uint256 balReserves = token.balanceOf(address(this));
+		uint256 amountToSend = price(balAmount, ethReserves, balReserves);
+
+		console.log("amountToSend: ", amountToSend);
+
+		(bool success, ) = msg.sender.call{ value: amountToSend }("");
+
+		require(success, "Failed to swap");
+
+		return amountToSend;
+	}
 
 	/**
 	 * @notice allows deposits of $BAL and $ETH to liquidity pool
