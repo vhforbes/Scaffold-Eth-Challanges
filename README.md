@@ -451,8 +451,8 @@ The basic overview for `ethToToken()` is we're going to define our variables to 
 
 ### 🥅 Goals / Checks
 
-- [ ] Can you trade ETH for Balloons and get the correct amount?
-- [ ] Can you trade Balloons for ETH?
+- [x] Can you trade ETH for Balloons and get the correct amount?
+- [x] Can you trade Balloons for ETH?
 
 > ⚠ When trading Balloons for ETH remember about allowances. Try using `approve()` to approve the contract address for some amount of tokens, then try the trade again!
 

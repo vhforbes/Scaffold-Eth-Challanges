@@ -82,15 +82,15 @@ contract DEX {
 		// send eth to contract
 		require(
 			msg.value == tokens,
-			"The amount of ethers and bal need to be equual"
+			"The amount of ethers and bal need to be equal"
 		);
 
 		// send ballons to contract (needs approval)
 		bool successBal = token.transferFrom(msg.sender, address(this), tokens);
 		require(successBal, "Failed to provide baloon");
 
-		totalLiquidity += tokens; // It didnt needed to be += since its initing... idk
-		liquidity[msg.sender] = totalLiquidity;
+		totalLiquidity = tokens;
+		liquidity[msg.sender] = tokens;
 
 		return totalLiquidity;
 	}
@@ -159,9 +159,17 @@ contract DEX {
 
 		console.log("amountToSend: ", amountToSend);
 
-		(bool success, ) = msg.sender.call{ value: amountToSend }("");
+		bool successBalReceive = token.transferFrom(
+			msg.sender,
+			address(this),
+			tokenInput
+		);
 
-		require(success, "Failed to swap");
+		require(successBalReceive, "Failed to receive tokens");
+
+		(bool successEthSend, ) = msg.sender.call{ value: amountToSend }("");
+
+		require(successEthSend, "Failed to send eth");
 
 		return amountToSend;
 	}
@@ -174,13 +182,85 @@ contract DEX {
 	 * function prior tothis function call.
 	 * NOTE: Equal parts of both assets will be removed from the user's wallet with respect to the price outlined by the AMM.
 	 */
-	function deposit() public payable returns (uint256 tokensDeposited) {}
+	function deposit() public payable returns (uint256 tokensDeposited) {
+		require(msg.value > 0, "Must send value when depositing");
+
+		uint256 ethReserves = address(this).balance - msg.value; // The msg. value is considered as balance before calculation;
+		uint256 balReserves = token.balanceOf(address(this));
+		uint256 tokenDeposit;
+
+		// (ethReserves / balReserves) gets the ratio btwn the two tokens
+
+		uint256 ratio = ethReserves / balReserves;
+
+		tokenDeposit = (msg.value * ratio) + 1;
+
+		totalLiquidity += tokenDeposit;
+		liquidity[msg.sender] += tokenDeposit;
+
+		bool successBalDeposit = token.transferFrom(
+			msg.sender,
+			address(this),
+			tokenDeposit
+		);
+		require(successBalDeposit, "Unable to receive Bal");
+
+		return tokenDeposit;
+	}
 
 	/**
 	 * @notice allows withdrawal of $BAL and $ETH from liquidity pool
 	 * NOTE: with this current code, the msg caller could end up getting very little back if the liquidity is super low in the pool. I guess they could see that with the UI.
 	 */
 	function withdraw(
-		uint256 amount
-	) public returns (uint256 eth_amount, uint256 token_amount) {}
+		uint256 liquidityAmount
+	) public returns (uint256 eth_amount, uint256 token_amount) {
+		// Ensure has enough liquidity
+		require(
+			liquidity[msg.sender] >= liquidityAmount,
+			"Not enought liquidity to withdraw"
+		);
+
+		// Making calculations
+		uint256 scale = 10 ** 18; // Needed for the division
+
+		uint256 ethReserves = address(this).balance; // The msg. value is considered as balance before calculation;
+		console.log("ethReserves: ", ethReserves);
+
+		uint256 balReserves = token.balanceOf(address(this));
+		console.log("balReserves: ", balReserves);
+
+		eth_amount;
+		token_amount;
+
+		uint256 ethRatio = (ethReserves * scale) / balReserves;
+		console.log("ethRatio: ", ethRatio);
+
+		eth_amount = ((liquidityAmount * scale) / ethRatio) + 1;
+		console.log("eth_amount: ", eth_amount);
+
+		uint256 balRatio = (balReserves * scale) / ethReserves;
+		console.log("balRatio: ", balRatio);
+
+		token_amount = ((liquidityAmount * scale) / balRatio) + 1;
+		console.log("token_amount: ", token_amount);
+
+		// Moving ETH and Token
+		(bool sentEthSuccess, ) = msg.sender.call{ value: eth_amount }("");
+		require(sentEthSuccess, "Unable to withdraw ether");
+
+		token.approve(address(this), token_amount);
+		bool sentTokenSuccess = token.transferFrom(
+			address(this),
+			msg.sender,
+			token_amount
+		);
+		require(sentTokenSuccess, "Unable to withdraw token");
+
+		// Updating contract liquidity
+		totalLiquidity -= liquidityAmount;
+		liquidity[msg.sender] -= liquidityAmount;
+
+		return (eth_amount, token_amount);
+	}
 }

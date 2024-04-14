@@ -2,6 +2,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { DEX } from "../typechain-types/contracts/DEX";
 import { Balloons } from "../typechain-types/contracts/Balloons";
+import { parseEther } from "ethers";
 
 /**
  * Deploys a contract named "YourContract" using the deployer account and
@@ -37,6 +38,9 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   const balloons: Balloons = await hre.ethers.getContract("Balloons", deployer);
   const balloonsAddress = await balloons.getAddress();
 
+  // paste in your front-end address here to get 10 balloons on deploy:
+  await balloons.transfer("0xfB448d51D7293B6dF66e89a781fb1744920B3Aef", parseEther("10"));
+
   await deploy("DEX", {
     from: deployer,
     // Contract constructor arguments
@@ -48,9 +52,6 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   });
 
   const dex = (await hre.ethers.getContract("DEX", deployer)) as DEX;
-
-  // paste in your front-end address here to get 10 balloons on deploy:
-  await balloons.transfer("0x482EEb0ca7f9547591B219f8f7bd4456439FbCaA", "" + 10 * 10 ** 18);
 
   // // uncomment to init DEX on deploy:
 
