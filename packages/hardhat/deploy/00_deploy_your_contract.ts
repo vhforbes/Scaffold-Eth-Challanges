@@ -59,8 +59,8 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   console.log("Approving DEX (" + dexAddress + ") to take Balloons from main account...");
   await balloons.approve(dexAddress, hre.ethers.parseEther("100"));
 
-  await dex.init(hre.ethers.parseEther("5"), {
-    value: hre.ethers.parseEther("5"),
+  await dex.init(hre.ethers.parseEther("0.05"), {
+    value: hre.ethers.parseEther("0.05"),
   });
 
   // const dexAddress = await dex.getAddress();
