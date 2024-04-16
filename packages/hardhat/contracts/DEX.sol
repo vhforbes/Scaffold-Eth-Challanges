@@ -130,34 +130,38 @@ contract DEX {
 	function ethToToken() public payable returns (uint256 tokenOutput) {
 		require(msg.value > 0, "cannot swap 0 ETH");
 		uint256 ethAmount = msg.value;
-		uint256 ethReserves = address(this).balance;
+		// IMPORTANT:
+		// !!!! THE CONTRACT CONSIDERS THE RECEIVED VALUE IN THE BEGGINING OF THE TRANSACTION !!!!
+		uint256 ethReserves = address(this).balance - msg.value; // THATS WHY DO THIS!
 		uint256 balReserves = token.balanceOf(address(this));
-		uint256 amountToSend = price(ethAmount, ethReserves, balReserves);
+		tokenOutput = price(ethAmount, ethReserves, balReserves);
 
-		token.approve(address(this), amountToSend);
+		token.approve(address(this), tokenOutput);
 
 		bool success = token.transferFrom(
 			address(this),
 			msg.sender,
-			amountToSend
+			tokenOutput
 		);
 
 		require(success, "Failed to swap");
 
-		return amountToSend;
+		emit EthToTokenSwap(msg.sender, tokenOutput, ethAmount);
+
+		return tokenOutput;
 	}
 
 	/**
 	 * @notice sends $BAL tokens to DEX in exchange for Ether
 	 */
 	function tokenToEth(uint256 tokenInput) public returns (uint256 ethOutput) {
-		require(token.balanceOf(msg.sender) > 0, "cannot swap 0 BAL");
-		uint256 balAmount = tokenInput;
+		require(tokenInput > 0, "Not enough token input");
+
 		uint256 ethReserves = address(this).balance;
 		uint256 balReserves = token.balanceOf(address(this));
-		uint256 amountToSend = price(balAmount, ethReserves, balReserves);
-
-		console.log("amountToSend: ", amountToSend);
+		// IMPORTANT => THE ORDER MATTER HERE =>     x            y
+		// If the X will always be the amount that will be calculated, if switched I would be calculating the eth amount
+		uint256 amountToSend = price(tokenInput, balReserves, ethReserves);
 
 		bool successBalReceive = token.transferFrom(
 			msg.sender,
@@ -170,6 +174,8 @@ contract DEX {
 		(bool successEthSend, ) = msg.sender.call{ value: amountToSend }("");
 
 		require(successEthSend, "Failed to send eth");
+
+		emit TokenToEthSwap(msg.sender, tokenInput, amountToSend);
 
 		return amountToSend;
 	}
@@ -193,7 +199,7 @@ contract DEX {
 
 		uint256 ratio = ethReserves / balReserves;
 
-		tokenDeposit = (msg.value * ratio) + 1;
+		tokenDeposit = (msg.value * ratio);
 
 		totalLiquidity += tokenDeposit;
 		liquidity[msg.sender] += tokenDeposit;
@@ -203,7 +209,15 @@ contract DEX {
 			address(this),
 			tokenDeposit
 		);
+
 		require(successBalDeposit, "Unable to receive Bal");
+
+		emit LiquidityProvided(
+			msg.sender,
+			tokenDeposit,
+			msg.value,
+			tokensDeposited
+		);
 
 		return tokenDeposit;
 	}
@@ -223,27 +237,16 @@ contract DEX {
 
 		// Making calculations
 		uint256 scale = 10 ** 18; // Needed for the division
-
 		uint256 ethReserves = address(this).balance; // The msg. value is considered as balance before calculation;
-		console.log("ethReserves: ", ethReserves);
-
 		uint256 balReserves = token.balanceOf(address(this));
-		console.log("balReserves: ", balReserves);
 
 		eth_amount;
 		token_amount;
 
 		uint256 ethRatio = (ethReserves * scale) / balReserves;
-		console.log("ethRatio: ", ethRatio);
-
-		eth_amount = ((liquidityAmount * scale) / ethRatio) + 1;
-		console.log("eth_amount: ", eth_amount);
-
+		eth_amount = ((liquidityAmount * scale) / ethRatio);
 		uint256 balRatio = (balReserves * scale) / ethReserves;
-		console.log("balRatio: ", balRatio);
-
-		token_amount = ((liquidityAmount * scale) / balRatio) + 1;
-		console.log("token_amount: ", token_amount);
+		token_amount = ((liquidityAmount * scale) / balRatio);
 
 		// Moving ETH and Token
 		(bool sentEthSuccess, ) = msg.sender.call{ value: eth_amount }("");
@@ -260,6 +263,13 @@ contract DEX {
 		// Updating contract liquidity
 		totalLiquidity -= liquidityAmount;
 		liquidity[msg.sender] -= liquidityAmount;
+
+		emit LiquidityRemoved(
+			msg.sender,
+			liquidityAmount,
+			token_amount,
+			eth_amount
+		);
 
 		return (eth_amount, token_amount);
 	}

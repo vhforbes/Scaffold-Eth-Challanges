@@ -124,26 +124,31 @@ describe("🚩 Challenge 4: ⚖️ 🪙 DEX", () => {
       it("Should be able to send 1 Ether to DEX in exchange for _ $BAL", async function () {
         const dexContractAddress = await dexContract.getAddress();
 
+        console.log("--- HERE --- ");
+
         const dex_eth_start = await ethers.provider.getBalance(dexContractAddress);
-        console.log("\t", " 💵 Dex contract's initial Eth balance:", ethers.formatEther(dex_eth_start));
-        console.log("\t", " 📞 Calling ethToToken with a value of 1 Eth...");
+
+        console.log("dex_eth_start: ", dex_eth_start);
+
         const tx1 = await dexContract.ethToToken({ value: ethers.parseEther("1") });
 
         expect(tx1, "ethToToken should revert before initalization").not.to.be.reverted;
 
-        console.log("\t", " 🔰 Initializing...");
+        // Making transaction
         const tx1_receipt = await tx1.wait();
         const ethSent_1 = await getEventValue(tx1_receipt, 2);
 
-        console.log("\t", " 🔼 Expecting the Eth value emitted to be 1.  Value:", ethers.formatEther(ethSent_1));
+        console.log("tx1_receipt: ", tx1_receipt);
+        console.log("ethSent_1: ", ethSent_1);
+
         expect(ethSent_1, "Check you are emitting the correct Eth value and in the correct order").to.equal(
           ethers.parseEther("1"),
         );
 
         const dex_eth_after = await ethers.provider.getBalance(dexContractAddress);
-        console.log("\t", " 💵 Dex contract's new Eth balance:", ethers.formatEther(dex_eth_after));
 
-        console.log("\t", " 💵 Expecting final Dex balance to have increased by 1...");
+        console.log("DEX AFTER: ", dex_eth_after);
+
         expect(await ethers.provider.getBalance(dexContractAddress)).to.equal(ethers.parseEther("6"));
       });
 

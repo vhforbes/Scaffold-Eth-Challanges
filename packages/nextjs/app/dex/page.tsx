@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { NextPage } from "next";
 import { formatEther, parseEther } from "viem";
-import { useAccount } from "wagmi";
+import { useAccount, usePublicClient } from "wagmi";
 import { Curve } from "~~/components/Curve";
 import { Address, AddressInput, Balance, EtherInput, IntegerInput } from "~~/components/scaffold-eth";
 import {
@@ -11,6 +11,7 @@ import {
   useDeployedContractInfo,
   useScaffoldContractRead,
   useScaffoldContractWrite,
+  useScaffoldEventHistory,
 } from "~~/hooks/scaffold-eth";
 
 // REGEX for number inputs (only allow numbers and a single decimal point)
@@ -29,6 +30,7 @@ const Dex: NextPage = () => {
   const { data: DEXInfo } = useDeployedContractInfo("DEX");
   const { data: BalloonsInfo } = useDeployedContractInfo("Balloons");
   const { address: connectedAccount } = useAccount();
+  const publicClient = usePublicClient();
 
   const { data: DEXBalloonBalance } = useScaffoldContractRead({
     contractName: "Balloons",
