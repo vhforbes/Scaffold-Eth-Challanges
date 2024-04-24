@@ -5,16 +5,16 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
 contract Streamer is Ownable {
-  event Opened(address, uint256);
-  event Challenged(address);
-  event Withdrawn(address, uint256);
-  event Closed(address);
+	event Opened(address, uint256);
+	event Challenged(address);
+	event Withdrawn(address, uint256);
+	event Closed(address);
 
-  mapping(address => uint256) balances;
-  mapping(address => uint256) canCloseAt;
+	mapping(address => uint256) balances;
+	mapping(address => uint256) canCloseAt;
 
-  function fundChannel() public payable {
-    /*
+	function fundChannel() public payable {
+		/*
       Checkpoint 2: fund a channel
 
       Complete this function so that it:
@@ -22,34 +22,46 @@ contract Streamer is Ownable {
       - updates the balances mapping with the eth received in the function call
       - emits an Opened event
     */
-  }
+		console.log(balances[msg.sender]);
 
-  function timeLeft(address channel) public view returns (uint256) {
-    if (canCloseAt[channel] == 0 || canCloseAt[channel] < block.timestamp) {
-      return 0;
-    }
+		balances[msg.sender] += msg.value;
+		emit Opened(msg.sender, msg.value);
 
-    return canCloseAt[channel] - block.timestamp;
-  }
+		require(
+			(balances[msg.sender] - msg.value) == 0,
+			"Already running a channel"
+		);
+	}
 
-  function withdrawEarnings(Voucher calldata voucher) public {
-    // like the off-chain code, signatures are applied to the hash of the data
-    // instead of the raw data itself
-    bytes32 hashed = keccak256(abi.encode(voucher.updatedBalance));
+	function timeLeft(address channel) public view returns (uint256) {
+		if (canCloseAt[channel] == 0 || canCloseAt[channel] < block.timestamp) {
+			return 0;
+		}
 
-    // The prefix string here is part of a convention used in ethereum for signing
-    // and verification of off-chain messages. The trailing 32 refers to the 32 byte
-    // length of the attached hash message.
-    //
-    // There are seemingly extra steps here compared to what was done in the off-chain
-    // `reimburseService` and `processVoucher`. Note that those ethers signing and verification
-    // functions do the same under the hood.
-    //
-    // see https://blog.ricmoo.com/verifying-messages-in-solidity-50a94f82b2ca
-    bytes memory prefixed = abi.encodePacked("\x19Ethereum Signed Message:\n32", hashed);
-    bytes32 prefixedHashed = keccak256(prefixed);
+		return canCloseAt[channel] - block.timestamp;
+	}
 
-    /*
+	function withdrawEarnings(Voucher calldata voucher) public {
+		// like the off-chain code, signatures are applied to the hash of the data
+		// instead of the raw data itself
+		bytes32 hashed = keccak256(abi.encode(voucher.updatedBalance));
+
+		// The prefix string here is part of a convention used in ethereum for signing
+		// and verification of off-chain messages. The trailing 32 refers to the 32 byte
+		// length of the attached hash message.
+		//
+		// There are seemingly extra steps here compared to what was done in the off-chain
+		// `reimburseService` and `processVoucher`. Note that those ethers signing and verification
+		// functions do the same under the hood.
+		//
+		// see https://blog.ricmoo.com/verifying-messages-in-solidity-50a94f82b2ca
+		bytes memory prefixed = abi.encodePacked(
+			"\x19Ethereum Signed Message:\n32",
+			hashed
+		);
+		bytes32 prefixedHashed = keccak256(prefixed);
+
+		/*
       Checkpoint 4: Recover earnings
 
       The service provider would like to cash out their hard earned ether.
@@ -59,9 +71,9 @@ contract Streamer is Ownable {
           - adjust the channel balance, and pay the Guru(Contract owner). Get the owner address with the `owner()` function.
           - emit the Withdrawn event
     */
-  }
+	}
 
-  /*
+	/*
     Checkpoint 5a: Challenge the channel
 
     Create a public challengeChannel() function that:
@@ -70,7 +82,7 @@ contract Streamer is Ownable {
     - emits a Challenged event
   */
 
-  /*
+	/*
     Checkpoint 5b: Close the channel
 
     Create a public defundChannel() function that:
@@ -80,13 +92,13 @@ contract Streamer is Ownable {
     - emits the Closed event
   */
 
-  struct Voucher {
-    uint256 updatedBalance;
-    Signature sig;
-  }
-  struct Signature {
-    bytes32 r;
-    bytes32 s;
-    uint8 v;
-  }
+	struct Voucher {
+		uint256 updatedBalance;
+		Signature sig;
+	}
+	struct Signature {
+		bytes32 r;
+		bytes32 s;
+		uint8 v;
+	}
 }
