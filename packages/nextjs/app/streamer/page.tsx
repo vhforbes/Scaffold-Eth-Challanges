@@ -100,6 +100,8 @@ const Streamer: NextPage = () => {
   });
 
   if (userIsOwner) {
+    console.log("receiveVoucher");
+
     Object.keys(channels)?.forEach(clientAddress => {
       channels[clientAddress].onmessage = receiveVoucher(clientAddress);
     });
@@ -120,6 +122,8 @@ const Streamer: NextPage = () => {
       }
       const updatedBalance = BigInt(`0x${data.updatedBalance}`);
 
+      console.log(data);
+
       /*
        *  Checkpoint 3:
        *
@@ -129,6 +133,22 @@ const Streamer: NextPage = () => {
        *  and then use verifyMessage() to confirm that voucher signer was
        *  `clientAddress`. (If it wasn't, log some error message and return).
        */
+
+      const packed = encodePacked(["uint256"], [updatedBalance]);
+      const hashed = keccak256(packed);
+      const arrayified = toBytes(hashed);
+
+      // Generating signature but the messa
+      const signature = await userSigner?.signMessage({ message: { raw: arrayified } });
+
+      if (!signature) return;
+
+      const valid = await verifyMessage({
+        address: clientAddress,
+        message: { raw: arrayified },
+        signature: data.signature, // What is this data.signature?? How is it diff from signature above??
+      });
+
       const existingVoucher = vouchers[clientAddress];
 
       // update our stored voucher if this new one is more valuable
